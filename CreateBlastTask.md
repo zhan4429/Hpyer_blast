@@ -20,8 +20,9 @@ Options::
 	-num_threads int_value,  default=1
 	-input_dir directory containing fasta files
 	-outfmt output formats, can be init value, or strings such as "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue"
+	-blastout_dir output directory for blast outputs
 	-other_blast_params Optional blast parameters, this should be put into quotes, such as "-num_descriptions 1 -max_target_seqs 5"
-
+	-output blasttaskfile 
 
 This is my orginal bash codes
 ```

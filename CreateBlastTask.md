@@ -3,7 +3,7 @@ Script called CreateBlastTask, it can be a bash script.
 Usage: 
 
 ```
-CreateBlastTask -p blastp -evalue 1e-3 -num_threads 1 -input_dir input -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue" -other_blast_params "-num_descriptions 1 -max_target_seqs 5" -output blastTaskfile.txt
+CreateBlastTask -p blastp -evalue 1e-3 -num_threads 1 -input_dir input -blastout_dir blastout -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue" -other_blast_params "-num_descriptions 1 -max_target_seqs 5" -output blastTaskfile.txt
 ```
 
 For `-other_blast_params`, even if users add quotes, we should remove quotes in the final output. 

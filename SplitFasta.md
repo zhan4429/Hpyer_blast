@@ -5,12 +5,14 @@ SplitFasta -in seq.fasta -outprefix seq -n 4
 ```
 
 Options:
-	-in input fasta
-	-outprefix prefix for output small fasta files
-	-n how many equal size output chunks we want to have
-	-l the number of sequences in each outputs
-	-h help inforamtion
-	-v version 
+- -in input fasta
+- -outprefix prefix for output small fasta files
+- -n how many equal size output chunks we want to have
+- -l the number of sequences in each outputs
+- -h help inforamtion
+- -v version 
+
+
 **warining**: users can only use `-n` or `-v`. If users provide both `-n` and `-v`, only `-n` will be used. 
 
 
@@ -28,4 +30,4 @@ awk 'BEGIN {n_seq=0;} /^>/ {if(n_seq%$length==0){file=sprintf("$prefix%d.fa",n_s
 ```
 
 ## Split fasta based on `-n`
-
+I will leave this to Payas. It should be easy to achieve by modifying the above awk code. 

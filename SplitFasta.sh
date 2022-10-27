@@ -6,7 +6,7 @@ help()
 {
     echo "This script takes in an input fasta file, puts all the sequences in one line, and splits it into multiple files based on input parameters"
     echo "Usage: ./SplitFasta.sh [ -in ] [ -outprefix ] [ -n ] [ -l ] [-v] [-h]"
-    echo "Example: ./SplitFasta.sh -in seq.fasta -outprefix seqaa -n 5"
+    echo "Example: ./SplitFasta.sh -in seq.fasta -outprefix seq -n 5"
     echo "-in: Input fasta file"
     echo "-outprefix: Prefix for output files names"
     echo "-n: Number of files to split into"
@@ -90,7 +90,7 @@ fi
 # If both -n and -l given
 if [ $length ] && [ $number ]
 then
-    echo "Warning: Both -n and -l given in command line, only using -n value"
+    echo "Warning: Both -n and -l are given in the command line, only -n value will be used"
     
     number_of_lines=$(wc -l < seq_singleline.faa)
     number_of_sequences=$((number_of_lines / 2))

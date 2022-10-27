@@ -83,7 +83,7 @@ awk '/^>/ { if(NR>1) print "";  printf("%s\n",$0); next; } { printf("%s",$0);}  
 # If only -l given
 if [ $length ] && [ -z $number ]
 then
-    awk -v lengths=$length -v prefix=$prefix 'BEGIN {n_seq=0;} /^>/ {if(n_seq%lengths==0){file=sprintf("%s%d.fa",prefix, n_seq);} print > file; n_seq++; next;} { print >> file; }' < seq_singleline.faa
+    awk -v lengths=$length -v prefix=$prefix 'BEGIN {n_seq=0; number2=0;} /^>/ {if(n_seq%lengths==0){file=sprintf("%s%d.fa",prefix, number2); number2++;} print > file; n_seq++; next;} { print >> file; }' < seq_singleline.faa
 fi
 
 
@@ -98,7 +98,7 @@ then
     if [ $((number_of_sequences % number)) == 0 ] # If equal split
     then
         number_of_sequences_per_file=$((number_of_sequences / number))
-        awk -v lengths=$number_of_sequences_per_file -v prefix=$prefix 'BEGIN {n_seq=0;} /^>/ {if(n_seq%lengths==0){file=sprintf("%s%d.fa",prefix, n_seq);} print > file; n_seq++; next;} { print >> file; }' < seq_singleline.faa
+        awk -v lengths=$number_of_sequences_per_file -v prefix=$prefix 'BEGIN {n_seq=0; number2=0;} /^>/ {if(n_seq%lengths==0){file=sprintf("%s%d.fa",prefix, number2); number2++;} print > file; n_seq++; next;} { print >> file; }' < seq_singleline.faa
     else # If not equal split
         number_of_sequences_per_file=$((number_of_sequences / number))
         number=$((number-1))
@@ -124,7 +124,7 @@ then
     if [ $((number_of_sequences % number)) == 0 ] # If equal split
     then
         number_of_sequences_per_file=$((number_of_sequences / number))
-        awk -v lengths=$number_of_sequences_per_file -v prefix=$prefix 'BEGIN {n_seq=0;} /^>/ {if(n_seq%lengths==0){file=sprintf("%s%d.fa",prefix, n_seq);} print > file; n_seq++; next;} { print >> file; }' < seq_singleline.faa
+        awk -v lengths=$number_of_sequences_per_file -v prefix=$prefix 'BEGIN {n_seq=0; number2=0;} /^>/ {if(n_seq%lengths==0){file=sprintf("%s%d.fa",prefix, number2); number2++;} print > file; n_seq++; next;} { print >> file; }' < seq_singleline.faa
     else # If not equal split
         number_of_sequences_per_file=$((number_of_sequences / number))
         number=$((number-1))

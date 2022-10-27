@@ -1,8 +1,18 @@
 #!/bin/bash
+# This script takes in an input fasta file, puts all the sequences in one line, and splits it into multiple files based on input parameters 
 
+version=0.1
 help()
 {
-    echo "Usage: SplitFasta [ -in ] [ -outprefix] [ -n ] [ -l ]"
+    echo "This script takes in an input fasta file, puts all the sequences in one line, and splits it into multiple files based on input parameters"
+    echo "Usage: ./SplitFasta.sh [ -in ] [ -outprefix ] [ -n ] [ -l ] [-v] [-h]"
+    echo "Example: ./SplitFasta.sh -in seq.fasta -outprefix seqaa -n 5"
+    echo "-in: Input fasta file"
+    echo "-outprefix: Prefix for output files names"
+    echo "-n: Number of files to split into"
+    echo "-l: Max number of sequences per output file"
+    echo "-h: Display help inforamtion"
+    echo "-v: Display version information"
     exit 2
 }
 
@@ -17,7 +27,8 @@ while [ $i -le ${#} ]; do
 			;;
 		-v)
             i=$(expr $i + 1 )
-			version=${!i}
+            echo "Version number: $version"
+            exit 0
 			;;
 		-n)
             i=$(expr $i + 1 )
@@ -43,16 +54,16 @@ while [ $i -le ${#} ]; do
 done 
 
 # Check variable names
-echo "-n = $number"
-echo "-l = $length"
-echo "-in = $input"
-echo "-v = $version"
-echo "-outprefix = $prefix"
+# echo "-n = $number"
+# echo "-l = $length"
+# echo "-in = $input"
+# echo "-outprefix = $prefix"
 
 
 # If -outprefix or -in missing
 if [ -z $prefix ] || [ -z $input ]
 then
+    echo "Warning: commandline arguments missing"
     help
 fi
 
@@ -60,6 +71,7 @@ fi
 # If both -l and -n missing 
 if [ -z $length ] && [ -z $number ]
 then
+    echo "Warning: commandline arguments missing"
     help
 fi
 
@@ -71,7 +83,6 @@ awk '/^>/ { if(NR>1) print "";  printf("%s\n",$0); next; } { printf("%s",$0);}  
 # If only -l given
 if [ $length ] && [ -z $number ]
 then
-    echo "Only -l given in command line"
     awk -v lengths=$length -v prefix=$prefix 'BEGIN {n_seq=0;} /^>/ {if(n_seq%lengths==0){file=sprintf("%s%d.fa",prefix, n_seq);} print > file; n_seq++; next;} { print >> file; }' < seq_singleline.faa
 fi
 
@@ -79,64 +90,54 @@ fi
 # If both -n and -l given
 if [ $length ] && [ $number ]
 then
-    echo "Both -n and -l given in command line, using -n value"
+    echo "Warning: Both -n and -l given in command line, only using -n value"
     
     number_of_lines=$(wc -l < seq_singleline.faa)
     number_of_sequences=$((number_of_lines / 2))
-    echo "number of sequences = $number_of_sequences"
 
-    if [ $((number_of_sequences % number)) == 0 ]
+    if [ $((number_of_sequences % number)) == 0 ] # If equal split
     then
-        echo "equal split"
         number_of_sequences_per_file=$((number_of_sequences / number))
-    else
-        echo "not equal split"
-        # echo $((number - number_of_sequences % number))
+        awk -v lengths=$number_of_sequences_per_file -v prefix=$prefix 'BEGIN {n_seq=0;} /^>/ {if(n_seq%lengths==0){file=sprintf("%s%d.fa",prefix, n_seq);} print > file; n_seq++; next;} { print >> file; }' < seq_singleline.faa
+    else # If not equal split
         number_of_sequences_per_file=$((number_of_sequences / number))
-        # echo $number_of_sequences_per_file
+        number=$((number-1))
         calculated_number=$((number_of_sequences_per_file * number))
-        # echo $calculated_number
-        difference=$((number_of_sequences - calculated_number))
-        # echo $difference
-        number_of_sequences_per_file=$((number_of_sequences_per_file + difference))
-        # echo $number_of_sequences_per_file
-        # echo $((number_of_sequences_per_file * number))
+        last_file_number_of_sequences=$((number_of_sequences - calculated_number))
+        number_of_lines=$((last_file_number_of_sequences * 2))
+        tail -n $number_of_lines seq_singleline.faa > temp.faa
+        head --lines=-$number_of_lines seq_singleline.faa > seq_singleline2.faa
+        awk -v lengths=$number_of_sequences_per_file -v prefix=$prefix 'BEGIN {n_seq=0; number2=0;} /^>/ {if(n_seq%lengths==0){file=sprintf("%s%d.fa",prefix, number2); number2++;} print > file; n_seq++; next;} { print >> file; }' < seq_singleline2.faa
+        mv temp.faa $prefix$number.fa
+        rm seq_singleline2.faa
     fi
     
-    echo "Max number of sequences per file: $number_of_sequences_per_file"
-    awk -v lengths=$number_of_sequences_per_file -v prefix=$prefix 'BEGIN {n_seq=0;} /^>/ {if(n_seq%lengths==0){file=sprintf("%s%d.fa",prefix, n_seq);} print > file; n_seq++; next;} { print >> file; }' < seq_singleline.faa
 fi
 
 
 # If only -n given
 if [ -z $length ] && [ $number ]
 then
-    echo "Only -n given in command line"
-    
     number_of_lines=$(wc -l < seq_singleline.faa)
     number_of_sequences=$((number_of_lines / 2))
-    echo "number of sequences = $number_of_sequences"
-
-    if [ $((number_of_sequences % number)) == 0 ]
-    then
-        echo "equal split"
-        number_of_sequences_per_file=$((number_of_sequences / number))
-    else
-        echo "not equal split"
-        # echo $((number - number_of_sequences % number))
-        number_of_sequences_per_file=$((number_of_sequences / number))
-        # echo $number_of_sequences_per_file
-        calculated_number=$((number_of_sequences_per_file * number))
-        # echo $calculated_number
-        difference=$((number_of_sequences - calculated_number))
-        # echo $difference
-        number_of_sequences_per_file=$((number_of_sequences_per_file + difference))
-        # echo $number_of_sequences_per_file
-        # echo $((number_of_sequences_per_file * number))
-    fi
     
-    echo "Max number of sequences per file: $number_of_sequences_per_file"
-    awk -v lengths=$number_of_sequences_per_file -v prefix=$prefix 'BEGIN {n_seq=0;} /^>/ {if(n_seq%lengths==0){file=sprintf("%s%d.fa",prefix, n_seq);} print > file; n_seq++; next;} { print >> file; }' < seq_singleline.faa
+    if [ $((number_of_sequences % number)) == 0 ] # If equal split
+    then
+        number_of_sequences_per_file=$((number_of_sequences / number))
+        awk -v lengths=$number_of_sequences_per_file -v prefix=$prefix 'BEGIN {n_seq=0;} /^>/ {if(n_seq%lengths==0){file=sprintf("%s%d.fa",prefix, n_seq);} print > file; n_seq++; next;} { print >> file; }' < seq_singleline.faa
+    else # If not equal split
+        number_of_sequences_per_file=$((number_of_sequences / number))
+        number=$((number-1))
+        calculated_number=$((number_of_sequences_per_file * number))
+        last_file_number_of_sequences=$((number_of_sequences - calculated_number))
+        number_of_lines=$((last_file_number_of_sequences * 2))
+        tail -n $number_of_lines seq_singleline.faa > temp.faa
+        head --lines=-$number_of_lines seq_singleline.faa > seq_singleline2.faa
+        awk -v lengths=$number_of_sequences_per_file -v prefix=$prefix 'BEGIN {n_seq=0; number2=0;} /^>/ {if(n_seq%lengths==0){file=sprintf("%s%d.fa",prefix, number2); number2++;} print > file; n_seq++; next;} { print >> file; }' < seq_singleline2.faa
+        mv temp.faa $prefix$number.fa
+        rm seq_singleline2.faa # rm singleline2 file
+    fi
+     
 fi
 
 
